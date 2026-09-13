@@ -1,0 +1,7 @@
+environment,test,destination,avg_latency_ms,min_latency_ms,max_latency_ms,packet_loss_percent
+wsl,1,home_router,8.743,4.824,15.895,0
+windows,1,home_router,5,3,12,0
+wsl,1,cloudflare_1.1.1.1,8.223,5.293,10.590,0
+windows,1,cloudflare_1.1.1.1,7,5,14,0
+wsl,1,google_8.8.8.8,8.824,6.034,19.089,0
+wsl,1,google.com,9.939,5.441,22.567,0
