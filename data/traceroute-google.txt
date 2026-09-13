@@ -1,6 +1,6 @@
 traceroute to google.com (142.250.139.138), 15 hops max, 60 byte packets
- 1  Hasans-Ideapad.mshome.net (172.28.96.1)  1.113 ms  0.848 ms  0.822 ms
- 2  mynetwork.home (192.168.2.1)  4.283 ms  4.268 ms  3.338 ms
+ 1 WSL-GATEWAY (WSL-GATEWAY)  1.113 ms  0.848 ms  0.822 ms
+ 2  HOME-ROUTER (HOME-ROUTER)  4.283 ms  4.268 ms  3.338 ms
  3  142.124.41.197 (142.124.41.197)  5.012 ms  6.890 ms  7.334 ms
  4  * * *
  5  * * *
