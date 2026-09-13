@@ -46,12 +46,12 @@ The following measurements were collected:
 
 The investigation identified two network gateways:
 
-- WSL virtual gateway: `172.28.96.1`
-- Home network gateway: `192.168.2.1`
+- WSL virtual gateway: `wsl_virtual_gateway`
+- Home network gateway: `home_gateway`
 
-WSL was assigned the IP address `172.28.107.62`.
+WSL was assigned the IP address `wsl_ip`.
 
-The WSL DNS configuration used `10.255.255.254` as its DNS server/proxy, while Windows used the home network gateway `192.168.2.1` for DNS resolution.
+The WSL DNS configuration used `wsl_dns_proxy` as its DNS server/proxy, while Windows used the home network gateway `home_gateway` for DNS resolution.
 
 ## Results
 
