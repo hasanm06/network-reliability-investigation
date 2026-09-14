@@ -1,0 +1,16 @@
+environment,test,destination,avg_latency_ms,min_latency_ms,max_latency_ms,packet_loss_percent
+wsl,1,cloudflare_1.1.1.1,14.784,7.529,21.005,0.0
+wsl,1,google_8.8.8.8,9.421,6.663,11.323,0.0
+wsl,1,google.com,10.948,7.877,16.497,0.0
+wsl,2,cloudflare_1.1.1.1,10.06,8.814,12.231,0.0
+wsl,2,google_8.8.8.8,7.837,6.65,8.99,0.0
+wsl,2,google.com,9.565,8.143,11.207,0.0
+wsl,3,cloudflare_1.1.1.1,8.377,7.659,9.288,0.0
+wsl,3,google_8.8.8.8,8.812,6.125,12.842,0.0
+wsl,3,google.com,8.912,6.626,9.934,0.0
+wsl,4,cloudflare_1.1.1.1,8.172,6.224,9.887,0.0
+wsl,4,google_8.8.8.8,9.276,6.493,12.678,0.0
+wsl,4,google.com,7.224,5.111,10.018,0.0
+wsl,5,cloudflare_1.1.1.1,9.272,7.195,10.619,0.0
+wsl,5,google_8.8.8.8,6.716,4.881,10.485,0.0
+wsl,5,google.com,15.778,5.024,42.409,0.0
