@@ -3,8 +3,12 @@ import re
 import csv
 import os
 import time
+from pathlib import Path
 
-ENVIRONMENT = "wsl"
+if os.name == "nt":
+    ENVIRONMENT = "windows"
+else:
+    ENVIRONMENT = "wsl"
 
 DESTINATIONS = {
     "cloudflare_1.1.1.1": "1.1.1.1",
@@ -13,35 +17,52 @@ DESTINATIONS = {
 }
 
 TEST_ROUNDS = 5
-FILE_PATH = "../data/automated-network-tests.csv"
+FILE_PATH = str(Path(__file__).resolve().parent.parent / "data" / "automated-network-tests.csv")
 
 
 def run_ping(destination):
     result = subprocess.run(
-        ["ping", "-c", "4", destination],
+        ["ping", "-n", "4", destination] if os.name == "nt"
+        else ["ping", "-c", "4", destination],
         capture_output=True,
         text=True
     )
 
     output = result.stdout
 
-    packet_loss_match = re.search(r"(\d+)% packet loss", output)
+    if os.name == "nt":
+        packet_loss_match = re.search(r"\((\d+)% loss\)", output)
 
-    latency_match = re.search(
-        r"rtt min/avg/max/mdev = ([\d.]+)/([\d.]+)/([\d.]+)/([\d.]+)",
-        output
-    )
+        latency_match = re.search(
+            r"Minimum = ([\d.]+)ms, Maximum = ([\d.]+)ms, Average = ([\d.]+)ms",
+            output
+        )
 
-    if packet_loss_match and latency_match:
-        return {
-            "packet_loss": float(packet_loss_match.group(1)),
-            "min_latency": float(latency_match.group(1)),
-            "avg_latency": float(latency_match.group(2)),
-            "max_latency": float(latency_match.group(3))
-        }
+        if packet_loss_match and latency_match:
+            return {
+                "packet_loss": float(packet_loss_match.group(1)),
+                "min_latency": float(latency_match.group(1)),
+                "avg_latency": float(latency_match.group(3)),
+                "max_latency": float(latency_match.group(2))
+            }
+
+    else:
+        packet_loss_match = re.search(r"(\d+)% packet loss", output)
+
+        latency_match = re.search(
+            r"rtt min/avg/max/mdev = ([\d.]+)/([\d.]+)/([\d.]+)/([\d.]+)",
+            output
+        )
+
+        if packet_loss_match and latency_match:
+            return {
+                "packet_loss": float(packet_loss_match.group(1)),
+                "min_latency": float(latency_match.group(1)),
+                "avg_latency": float(latency_match.group(2)),
+                "max_latency": float(latency_match.group(3))
+            }
 
     return None
-
 
 def save_result(destination_name, result, test_number):
     file_exists = os.path.exists(FILE_PATH)
