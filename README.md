@@ -2,121 +2,116 @@
 
 ## Overview
 
-This project investigates network performance from two environments: Windows and Windows Subsystem for Linux (WSL).
+This project investigates network performance between Windows and Windows Subsystem for Linux (WSL) on the same computer.
 
-The goal is to determine whether differences in network performance can be observed between Windows and WSL, and to identify where delays may occur across the network.
+The goal is to determine whether measurable differences in network latency and reliability can be observed between the two environments.
 
-The project was expanded with Python automation to collect repeated network measurements and analyze the results.
+The project combines Linux and Windows networking tools with Python automation and data analysis.
 
 ## Research Question
 
-Does the virtualization and networking layer between Windows and WSL introduce measurable differences in network performance?
+**Does the networking layer between Windows and WSL introduce measurable differences in network performance?**
 
-To investigate this, the project compares:
+The investigation compares network performance using:
 
-* Latency to the home network gateway
-* Latency to an external DNS/public network service
-* Connectivity to public IP addresses
-* DNS lookup performance
-* The network path from WSL to Google using traceroute
+* Ping latency
+* Minimum and maximum latency
+* Packet loss
+* DNS and public network destinations
+* Traceroute results
+* Repeated network measurements
 
 ## Methodology
 
-The investigation used command-line networking tools in both Windows and WSL.
+Initial network investigation was performed manually using Windows PowerShell and WSL.
 
-The following measurements were collected:
+The project was then expanded with Python automation to collect repeated measurements from WSL.
 
-* Ping tests to measure latency and packet loss
-* DNS lookups to measure name-resolution performance
-* IP and routing information to identify network interfaces and gateways
-* Traceroute to examine the path from WSL to Google
-* Repeated tests to make the measurements more reliable
+The automated tests measured:
 
-The Python automation runs five test rounds across three destinations, producing 15 automated measurements.
+* Cloudflare DNS: `1.1.1.1`
+* Google DNS: `8.8.8.8`
+* Google.com
+
+Each automated WSL test round sends four ping requests to each destination.
+
+The Windows measurements were collected using the native Windows `ping` command as a baseline comparison.
 
 ## Tools Used
 
 * Linux / WSL
-* Bash
 * Windows PowerShell
 * Python
 * Matplotlib
-* ping
-* nslookup
-* traceroute
-* ip
+* Bash
+* `ping`
+* `nslookup`
+* `traceroute`
+* `ip`
 * Git
 * CSV data collection
 
 ## Network Configuration
 
-The investigation identified two network gateways:
+The investigation identified the following network components:
 
 * WSL virtual gateway: `172.28.96.1`
 * Home network gateway: `192.168.2.1`
-
-The WSL DNS configuration used `10.255.255.254` as its DNS server/proxy, while Windows used the home network gateway `192.168.2.1` for DNS resolution.
+* WSL DNS server/proxy: `10.255.255.254`
+* Windows DNS: `192.168.2.1`
 
 ## Results
 
-### Network Latency
+### WSL vs Windows Network Latency
 
-| Environment | Destination          | Average Latency | Packet Loss |
-| ----------- | -------------------- | --------------: | ----------: |
-| WSL         | Home network gateway |        8.743 ms |          0% |
-| Windows     | Home network gateway |            5 ms |          0% |
-| WSL         | Cloudflare (1.1.1.1) |        8.223 ms |          0% |
-| Windows     | Cloudflare (1.1.1.1) |            7 ms |          0% |
-| WSL         | Google (8.8.8.8)     |        8.824 ms |          0% |
-| WSL         | Google.com           |        9.939 ms |          0% |
+The automated analysis produced the following results:
 
-All recorded ping tests successfully received responses with 0% packet loss.
+| Environment | Destination          |  Average | Minimum |  Maximum | Packet Loss |
+| ----------- | -------------------- | -------: | ------: | -------: | ----------: |
+| WSL         | Cloudflare `1.1.1.1` |  9.41 ms | 6.22 ms | 21.00 ms |       2.50% |
+| WSL         | Google DNS `8.8.8.8` |  8.62 ms | 4.88 ms | 14.35 ms |          0% |
+| WSL         | Google.com           | 10.14 ms | 5.02 ms | 42.41 ms |          0% |
+| Windows     | Cloudflare `1.1.1.1` |  8.00 ms | 5.00 ms | 14.00 ms |          0% |
+| Windows     | Google DNS `8.8.8.8` |  7.00 ms | 5.00 ms | 10.00 ms |          0% |
+| Windows     | Google.com           | 13.00 ms | 5.00 ms | 16.00 ms |          0% |
 
-### DNS Performance
+### Key Findings
 
-WSL DNS lookup times for Google ranged from 32 ms to 50 ms, while Microsoft ranged from 31 ms to 60 ms.
+* Windows had lower average latency than WSL when testing Cloudflare and Google DNS.
+* WSL had lower average latency than Windows when testing Google.com.
+* Both environments generally showed low latency.
+* Windows recorded 0% packet loss in the baseline measurements.
+* WSL recorded a packet-loss event during one Cloudflare test round.
+* The WSL Cloudflare results averaged 2.50% packet loss across the stored WSL test rounds.
+* WSL also showed greater latency variability for Google.com, with a maximum recorded latency of 42.41 ms.
 
-A Windows DNS lookup for Google took 83.5233 ms.
+The differences were measurable, but relatively small.
 
-The Windows DNS measurement was only performed once, so it should not be treated as a direct statistical comparison with the repeated WSL measurements.
+### Latency Visualization
 
-### Traceroute Findings
+The analysis script generates a comparison of average latency between Windows and WSL.
 
-The traceroute from WSL to Google reached the destination in 11 hops.
+The error ranges show the observed minimum and maximum latency for each environment and destination.
 
-The first hop was the WSL virtual gateway, followed by the home network gateway. The remaining hops represented network infrastructure between the local network and Google.
+![WSL vs Windows Network Latency](results/latency_comparison.png)
 
-Two intermediate hops did not respond to the traceroute probes and appeared as `* * *`. However, the traceroute continued successfully and reached Google, so these responses alone do not indicate a network failure.
+## DNS Performance
 
-The measured latency increased from approximately 1 ms at the WSL gateway to approximately 9 ms at the destination.
+DNS testing was also performed during the initial investigation.
 
-## Automated Network Results
+WSL DNS lookups were tested using the WSL DNS configuration, while Windows used its native DNS configuration.
 
-The Python automation tested Cloudflare (1.1.1.1), Google DNS (8.8.8.8), and Google.com across five test rounds.
+The DNS measurements were collected separately from the automated latency comparison and were not repeated enough to make a strong statistical comparison.
 
-| Destination          | Average Latency | Packet Loss |
-| -------------------- | --------------: | ----------: |
-| Cloudflare (1.1.1.1) |        10.13 ms |          0% |
-| Google DNS (8.8.8.8) |         8.41 ms |          0% |
-| Google.com           |        10.49 ms |          0% |
+## Traceroute Findings
 
-All 15 automated tests recorded 0% packet loss.
+A traceroute from WSL to Google reached the destination in 11 hops.
 
-The analysis script also generates a visualization comparing the average latency between destinations.
+The first hop was the WSL virtual gateway, followed by the home network gateway.
 
-![Average Network Latency](results/latency_comparison.png)
+Some intermediate hops did not respond to traceroute probes and appeared as `* * *`. However, the traceroute continued successfully and reached Google.
 
-## Conclusion
-
-The measurements show that both Windows and WSL had stable connectivity during the investigation, with 0% packet loss in the recorded ping tests.
-
-WSL generally showed slightly higher latency than Windows when testing the home network gateway and Cloudflare. However, the differences were small, suggesting that the WSL networking layer introduced some measurable overhead but did not significantly affect connectivity during these tests.
-
-The automated testing also showed stable network performance across five test rounds, with average latency remaining below approximately 11 ms for all three destinations.
-
-The DNS results also show that DNS resolution was working correctly in WSL. However, because the Windows and WSL DNS measurements used different DNS servers and different numbers of tests, the results cannot be considered a perfectly controlled comparison.
-
-Overall, the project demonstrates how Linux, Python, networking tools, and data analysis can be used to collect evidence, automate measurements, and analyze network performance rather than relying only on how fast the internet feels.
+The measured latency increased from approximately 1 ms near the local WSL gateway to approximately 9 ms at the destination.
 
 ## Project Structure
 
@@ -138,16 +133,34 @@ network-reliability-investigation/
 
 ## How to Run
 
-Run the automated network tests:
+From the project root, run the automated network tests:
 
 ```bash
-cd scripts
-python3 network_test.py
+python3 scripts/network_test.py
 ```
 
-Analyze the results and generate the visualization:
+Then analyze the collected data and generate the visualization:
 
 ```bash
-python3 analyze_results.py
-``
+python3 scripts/analyze_results.py
 ```
+
+The network testing script automatically detects whether it is running in Windows or WSL and uses the appropriate ping command.
+
+## Limitations
+
+The WSL measurements contain repeated automated test rounds, while the Windows measurements currently provide a smaller baseline sample.
+
+Because the number of measurements is not equal between the two environments, the results should be treated as an investigation rather than a definitive benchmark.
+
+Network conditions can also change over time depending on traffic, routing, DNS behavior, and other factors.
+
+## Conclusion
+
+The investigation found measurable differences between Windows and WSL network performance, but the differences were relatively small.
+
+Windows performed better for Cloudflare and Google DNS in the recorded measurements, while WSL performed better for Google.com.
+
+The project also demonstrated that WSL can experience occasional packet loss and latency variation even when overall network performance remains stable.
+
+The final project combines networking fundamentals, Linux, Windows PowerShell, Python automation, CSV data collection, statistical analysis, and data visualization to investigate a real networking question.
